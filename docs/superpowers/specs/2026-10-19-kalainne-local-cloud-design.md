@@ -24,7 +24,13 @@ O agente escolhe o binário nesta ordem:
 
 1. `archify/bin/archify.mjs` dentro do workspace atual. É o caminho da nuvem e de quem trabalha neste repositório.
 2. `archify-root.json` ao lado do skill, com `resolution: "recorded-root"` e o caminho absoluto deste checkout. É o caminho de outro projeto no desktop, depois do instalador.
-3. Parar e pedir `node integrations/kalainne/bin/install.mjs`. Não inventar outro binário e não chamar rede para baixar o Archify.
+3. Parar e pedir instalação a partir deste checkout Archify:
+
+```bash
+node /caminho/do/archify/integrations/kalainne/bin/install.mjs install --scope project --target /caminho/deste/projeto
+```
+
+Não rode `integrations/kalainne/bin/install.mjs` a partir de um projeto de produto: esse caminho só existe neste checkout. Não inventar outro binário e não chamar rede para baixar o Archify.
 
 ## Superfícies
 
