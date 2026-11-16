@@ -3,6 +3,7 @@
   "diagram_type": "dataflow",
   "meta": {
     "title": "Conhecimento Kalainne",
+    "output": "integrations/kalainne/artifacts/conhecimento.dataflow.html",
     "viewBox": [1068, 560],
     "quality_profile": "showcase",
     "animation": "trace",

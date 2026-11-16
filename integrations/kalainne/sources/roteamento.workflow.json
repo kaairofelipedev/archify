@@ -3,6 +3,7 @@
   "diagram_type": "workflow",
   "meta": {
     "title": "Roteamento Kalainne",
+    "output": "integrations/kalainne/artifacts/roteamento.workflow.html",
     "quality_profile": "showcase",
     "animation": "trace",
     "views": [

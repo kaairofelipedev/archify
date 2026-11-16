@@ -3,6 +3,7 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "Ecossistema Kalainne",
+    "output": "integrations/kalainne/artifacts/ecossistema.architecture.html",
     "quality_profile": "showcase",
     "animation": "trace",
     "views": [
