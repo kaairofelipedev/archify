@@ -48,6 +48,8 @@ node integrations/kalainne/bin/bootstrap.mjs --targets integrations/kalainne/tar
 node integrations/kalainne/bin/install.mjs doctor --target . --json
 ```
 
+No Windows, se `HOME` não existir, `--with-user` usa `USERPROFILE`.
+
 O bootstrap falha se algum path listado não existir, se `archifyCheckout` não for este repositório, ou se o `doctor` do Archify falhar. Ele é idempotente: pode rodar de novo após adicionar um projeto à lista.
 
 O escopo `user` escreve `~/.agents/skills/kalainne-archify` e `~/.cursor/skills/kalainne-archify`. O escopo `project` escreve `.agents/skills/kalainne-archify` e `.cursor/rules/kalainne-archify.mdc`. Claude Code, Codex e OpenCode leem o skill de projeto em `.agents/skills/`.
@@ -112,10 +114,10 @@ Ficam de fora até o Kairo confirmar a stack: importar fluxo n8n, conectar Whats
 ## Prova local
 
 ```bash
-node --test integrations/kalainne/test/maps.test.mjs
+node --test integrations/kalainne/test/*.test.mjs
 ```
 
-O teste exige os três JSON em `showcase` e confere que o HTML entregue contém o título autoral. O workflow `Kalainne maps` roda o mesmo teste quando esta pasta muda.
+A suíte exige os três JSON em `showcase`, confere que o HTML commitado é o `deliver` atual, e cobre install, bootstrap e doctor. O workflow `Kalainne maps` roda a mesma suíte quando esta pasta, o skill commitado ou a regra Cursor mudam.
 
 ## Evidência usada
 

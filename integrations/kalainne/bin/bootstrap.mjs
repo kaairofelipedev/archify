@@ -71,6 +71,21 @@ function loadTargets(file) {
   return data;
 }
 
+function parseInstallJson(result) {
+  try {
+    return { ok: true, value: JSON.parse(result.stdout) };
+  } catch {
+    return {
+      ok: false,
+      value: { reason: 'bad-install-json', stdout: result.stdout, stderr: result.stderr },
+    };
+  }
+}
+
+function resolveHome(options) {
+  return options.home || process.env.HOME || process.env.USERPROFILE || '';
+}
+
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const targets = loadTargets(options.targets);
@@ -112,13 +127,14 @@ function main() {
 
   let user = null;
   if (options.withUser) {
-    const home = options.home || process.env.HOME;
-    if (!home) fail('--with-user exige --home ou a variável HOME', 2);
+    const home = resolveHome(options);
+    if (!home) fail('--with-user exige --home, HOME ou USERPROFILE', 2);
     const result = runInstall(['install', '--scope', 'user', '--home', home, '--json']);
+    const parsed = result.status === 0 ? parseInstallJson(result) : { ok: false, value: { stderr: result.stderr, stdout: result.stdout } };
     user = {
-      status: result.status === 0 ? 'ok' : 'failed',
+      status: result.status === 0 && parsed.ok ? 'ok' : 'failed',
       home: path.resolve(home),
-      detail: result.status === 0 ? JSON.parse(result.stdout) : { stderr: result.stderr },
+      detail: parsed.value,
     };
   }
 
@@ -136,12 +152,21 @@ function main() {
       continue;
     }
     const result = runInstall(['install', '--scope', 'project', '--target', resolved, '--json']);
-    if (result.status === 0) {
+    const parsed = result.status === 0 ? parseInstallJson(result) : null;
+    if (result.status === 0 && parsed.ok) {
       projects.push({
         id,
         path: resolved,
         status: 'ok',
-        detail: JSON.parse(result.stdout),
+        detail: parsed.value,
+      });
+    } else if (result.status === 0) {
+      projects.push({
+        id,
+        path: resolved,
+        status: 'failed',
+        reason: 'bad-install-json',
+        detail: parsed.value,
       });
     } else {
       projects.push({

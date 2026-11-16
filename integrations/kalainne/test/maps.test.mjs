@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -47,6 +48,27 @@ test('delivered HTML contains the authored titles', () => {
   ];
   for (const [relativePath, title] of expected) {
     assert.match(read(relativePath), new RegExp(`<h1>${title}</h1>`));
+  }
+});
+
+test('committed HTML matches a fresh showcase deliver', () => {
+  const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-deliver-'));
+  for (const map of manifest.maps) {
+    const delivered = path.join(outDir, `${map.id}.html`);
+    const result = spawnSync(process.execPath, [
+      'archify/bin/archify.mjs',
+      'deliver',
+      map.type,
+      map.source,
+      delivered,
+      '--quality',
+      'showcase',
+      '--json',
+    ], { cwd: repoRoot, encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const fresh = fs.readFileSync(delivered);
+    const committed = fs.readFileSync(path.join(repoRoot, map.artifact));
+    assert.equal(fresh.equals(committed), true, map.artifact);
   }
 });
 

@@ -76,6 +76,26 @@ test('bootstrap with --with-user writes the desktop skill roots', () => {
   assert.equal(fs.existsSync(path.join(home, '.cursor', 'skills', 'kalainne-archify', 'SKILL.md')), true);
 });
 
+test('bootstrap --with-user uses USERPROFILE when HOME is unset', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-bootstrap-profile-'));
+  const home = path.join(root, 'home');
+  const project = path.join(root, 'project');
+  fs.mkdirSync(home);
+  fs.mkdirSync(project);
+  const targets = path.join(root, 'targets.json');
+  writeTargets(targets, [{ id: 'project', path: project }]);
+  const env = { ...process.env, USERPROFILE: home };
+  delete env.HOME;
+  const result = spawnSync(process.execPath, [bootstrap, '--targets', targets, '--with-user', '--json'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    env,
+  });
+  assert.equal(result.status, 0, result.stderr + result.stdout);
+  assert.equal(JSON.parse(result.stdout).user.home, home);
+  assert.equal(fs.existsSync(path.join(home, '.agents', 'skills', 'kalainne-archify', 'SKILL.md')), true);
+});
+
 test('bootstrap fails when a listed project path is missing', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-bootstrap-missing-'));
   const project = path.join(root, 'exists');

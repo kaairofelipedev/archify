@@ -75,6 +75,47 @@ test('doctor uses the workspace CLI and a user install for another project', () 
   assert.equal(JSON.parse(remote.stdout).resolution, 'recorded-root');
 });
 
+test('doctor reports invalid root JSON and a missing recorded bin without a stack trace', () => {
+  const invalid = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-invalid-root-'));
+  const skillDir = path.join(invalid, '.agents', 'skills', 'kalainne-archify');
+  fs.mkdirSync(skillDir, { recursive: true });
+  fs.writeFileSync(path.join(skillDir, 'archify-root.json'), '{not json');
+  const broken = run(['doctor', '--target', invalid, '--json']);
+  assert.equal(broken.status, 1);
+  assert.equal(JSON.parse(broken.stdout).error, 'invalid-root');
+  assert.doesNotMatch(broken.stderr, /SyntaxError/);
+
+  const missingBin = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-missing-bin-'));
+  const missingSkill = path.join(missingBin, '.agents', 'skills', 'kalainne-archify');
+  fs.mkdirSync(missingSkill, { recursive: true });
+  const absent = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-absent-root-'));
+  fs.writeFileSync(path.join(missingSkill, 'archify-root.json'), `${JSON.stringify({
+    schema_version: 1,
+    resolution: 'recorded-root',
+    archifyRoot: absent,
+    archifyBin: 'archify/bin/archify.mjs',
+  })}\n`);
+  const gone = run(['doctor', '--target', missingBin, '--json']);
+  assert.equal(gone.status, 1);
+  const payload = JSON.parse(gone.stdout);
+  assert.equal(payload.error, 'bin-missing');
+  assert.equal(payload.resolution, 'recorded-root');
+  assert.equal(payload.bin, path.join(absent, 'archify', 'bin', 'archify.mjs'));
+});
+
+test('committed skill and rule match the installer templates', () => {
+  const templateSkill = path.join(repoRoot, 'integrations', 'kalainne', 'skill', 'SKILL.md');
+  const templateRule = path.join(repoRoot, 'integrations', 'kalainne', 'skill', 'rule.mdc');
+  assert.equal(
+    fs.readFileSync(path.join(repoRoot, '.agents', 'skills', 'kalainne-archify', 'SKILL.md'), 'utf8'),
+    fs.readFileSync(templateSkill, 'utf8'),
+  );
+  assert.equal(
+    fs.readFileSync(path.join(repoRoot, '.cursor', 'rules', 'kalainne-archify.mdc'), 'utf8'),
+    fs.readFileSync(templateRule, 'utf8'),
+  );
+});
+
 test('missing target and unknown argument fail before writing', () => {
   const missing = run(['install', '--scope', 'project', '--target', path.join(os.tmpdir(), 'kalainne-missing-dir')]);
   assert.equal(missing.status, 2);

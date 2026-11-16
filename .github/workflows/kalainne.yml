@@ -4,11 +4,15 @@ on:
   pull_request:
     paths:
       - 'integrations/kalainne/**'
+      - '.agents/skills/kalainne-archify/**'
+      - '.cursor/rules/kalainne-archify.mdc'
       - '.github/workflows/kalainne.yml'
   push:
     branches: [main]
     paths:
       - 'integrations/kalainne/**'
+      - '.agents/skills/kalainne-archify/**'
+      - '.cursor/rules/kalainne-archify.mdc'
       - '.github/workflows/kalainne.yml'
   workflow_dispatch:
 

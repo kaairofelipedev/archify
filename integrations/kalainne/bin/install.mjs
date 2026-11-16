@@ -100,10 +100,25 @@ function installUser(home) {
   return { scope: 'user', skillDirs, record };
 }
 
+function invalidRoot(file) {
+  return {
+    error: 'invalid-root',
+    resolution: null,
+    bin: null,
+    skill: path.dirname(file),
+  };
+}
+
 function recordedRoot(file) {
   if (!fs.existsSync(file)) return null;
-  const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (data.resolution !== 'recorded-root' || !data.archifyRoot || !data.archifyBin) return null;
+  let data;
+  try {
+    data = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return invalidRoot(file);
+  }
+  if (!data || typeof data !== 'object' || data.schema_version !== 1) return invalidRoot(file);
+  if (data.resolution !== 'recorded-root' || !data.archifyRoot || !data.archifyBin) return invalidRoot(file);
   return {
     resolution: 'recorded-root',
     root: data.archifyRoot,
@@ -146,8 +161,14 @@ function main() {
     const target = existingDir('--target', options.target ?? process.cwd());
     const home = options.home ? existingDir('--home', options.home) : null;
     const found = locate(target, home);
-    if (!found || !fs.existsSync(found.bin)) {
-      const payload = { ok: false, resolution: null, bin: found ? found.bin : null, skill: found ? found.skill : null };
+    if (!found || found.error || !fs.existsSync(found.bin)) {
+      const payload = {
+        ok: false,
+        resolution: found ? found.resolution : null,
+        error: found?.error || (found ? 'bin-missing' : 'not-found'),
+        bin: found ? found.bin : null,
+        skill: found ? found.skill : null,
+      };
       if (options.json) process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
       else process.stderr.write('CLI do Archify não encontrado.\n');
       process.exit(1);

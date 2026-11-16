@@ -35,6 +35,10 @@ node <bin> deliver <tipo> <arquivo.json> <saida.html> --quality showcase --json
 
 Substitua `<bin>` pelo arquivo resolvido acima. Workflow novo usa `schema_version` 2. Os outros tipos usam `schema_version` 1. Uma saída diferente de zero não é entrega.
 
+## Contrato
+
+Para tarefas da Kalainne, leia `integrations/kalainne/AGENTS.md` junto com `archify/SKILL.md`. O primeiro fixa o contrato operacional deste fork. O segundo é a skill do CLI.
+
 ## Fontes
 
 - Marca: Central de Marca no Notion.
