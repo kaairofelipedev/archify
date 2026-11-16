@@ -175,10 +175,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    # Fork macOS runners often cancel with empty steps after ~15m waiting.
-    # Keep attempting the job, but do not block the PR when the host never starts.
-    continue-on-error: ${{ matrix.os == 'macos-latest' && github.repository_owner != 'tt-a1i' }}
+        # Fork macOS runners here cancel with empty steps after ~15m waiting and
+        # leave the PR UNSTABLE even with continue-on-error. Upstream keeps macos.
+        os: ${{ fromJSON(github.repository_owner == 'tt-a1i' && '["ubuntu-latest","macos-latest","windows-latest"]' || '["ubuntu-latest","windows-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
