@@ -739,5 +739,9 @@ test('CI tests the declared Node floor plus every maintained current lane', () =
 
   const packageSmokeJob = workflowJob(workflow, 'package-smoke');
   assert.match(packageSmokeJob, /os:\s*\[ubuntu-latest, macos-latest, windows-latest\]/);
+  assert.match(
+    packageSmokeJob,
+    /matrix\.os != 'macos-latest' \|\| github\.repository_owner == 'tt-a1i'/,
+  );
   assert.match(packageSmokeJob, /node-version:\s*22/);
 });

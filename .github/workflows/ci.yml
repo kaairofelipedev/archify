@@ -172,12 +172,14 @@ jobs:
 
   package-smoke:
     name: package smoke (${{ matrix.os }})
+    # Keep the declared OS matrix intact for release gates. On this fork, macos
+    # runners cancel with empty steps after ~15m and leave the PR UNSTABLE, so
+    # skip that matrix leg outside tt-a1i while ubuntu/windows stay required.
+    if: ${{ matrix.os != 'macos-latest' || github.repository_owner == 'tt-a1i' }}
     strategy:
       fail-fast: false
       matrix:
-        # Fork macOS runners here cancel with empty steps after ~15m waiting and
-        # leave the PR UNSTABLE even with continue-on-error. Upstream keeps macos.
-        os: ${{ fromJSON(github.repository_owner == 'tt-a1i' && '["ubuntu-latest","macos-latest","windows-latest"]' || '["ubuntu-latest","windows-latest"]') }}
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
