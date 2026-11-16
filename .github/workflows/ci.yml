@@ -560,7 +560,8 @@ jobs:
         run: scripts/windows-path-fixtures.ps1 -NodeVersion '${{ matrix.node-version }}' -Cleanup
 
   deploy-pages:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # This fork has no GitHub Pages site. Upstream still deploys from main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository_owner == 'tt-a1i'
     needs: [test, canonical-test, webm-artifact, zip-freshness, published-update-manifest, package-smoke, windows-test-portability, website]
     runs-on: ubuntu-latest
     concurrency:
