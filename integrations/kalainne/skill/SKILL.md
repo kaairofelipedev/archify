@@ -37,7 +37,7 @@ Substitua `<bin>` pelo arquivo resolvido acima. Workflow novo usa `schema_versio
 
 ## Contrato
 
-Para tarefas da Kalainne, leia `integrations/kalainne/AGENTS.md` junto com `archify/SKILL.md`. O primeiro fixa o contrato operacional deste fork. O segundo é a skill do CLI.
+Se o checkout tiver `integrations/kalainne/AGENTS.md`, leia esse arquivo junto com `archify/SKILL.md`. O primeiro fixa o contrato operacional deste fork. O segundo é a skill do CLI. Em outro projeto, esses arquivos não existem: use só esta skill e o `archify-root.json`.
 
 ## Fontes
 

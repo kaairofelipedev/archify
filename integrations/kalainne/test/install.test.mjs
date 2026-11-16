@@ -114,6 +114,7 @@ test('committed skill and rule match the installer templates', () => {
     fs.readFileSync(path.join(repoRoot, '.cursor', 'rules', 'kalainne-archify.mdc'), 'utf8'),
     fs.readFileSync(templateRule, 'utf8'),
   );
+  assert.match(fs.readFileSync(templateSkill, 'utf8'), /Se o checkout tiver `integrations\/kalainne\/AGENTS.md`/);
 });
 
 test('missing target and unknown argument fail before writing', () => {
