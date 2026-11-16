@@ -114,7 +114,37 @@ test('committed skill and rule match the installer templates', () => {
     fs.readFileSync(path.join(repoRoot, '.cursor', 'rules', 'kalainne-archify.mdc'), 'utf8'),
     fs.readFileSync(templateRule, 'utf8'),
   );
-  assert.match(fs.readFileSync(templateSkill, 'utf8'), /Se o checkout tiver `integrations\/kalainne\/AGENTS.md`/);
+  const skillText = fs.readFileSync(templateSkill, 'utf8');
+  assert.match(skillText, /Se o checkout tiver `integrations\/kalainne\/AGENTS.md`/);
+  assert.match(skillText, /\/caminho\/do\/archify\/integrations\/kalainne\/bin\/install\.mjs/);
+  assert.doesNotMatch(
+    skillText,
+    /node integrations\/kalainne\/bin\/install\.mjs install --scope project --target \./,
+  );
+  const committedRoot = readJson(path.join(repoRoot, '.agents', 'skills', 'kalainne-archify', 'archify-root.json'));
+  assert.equal(committedRoot.resolution, 'workspace');
+  assert.equal(committedRoot.archifyBin, 'archify/bin/archify.mjs');
+});
+
+test('doctor reports not-found for an empty project without home', () => {
+  const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-doctor-empty-'));
+  const result = run(['doctor', '--target', empty, '--json']);
+  assert.equal(result.status, 1);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.ok, false);
+  assert.equal(payload.error, 'not-found');
+  assert.equal(payload.resolution, null);
+});
+
+test('user install defaults --home from HOME when omitted', () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-home-default-'));
+  const result = spawnSync(process.execPath, [installer, 'install', '--scope', 'user', '--json'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    env: { ...process.env, HOME: home },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(fs.existsSync(path.join(home, '.agents', 'skills', 'kalainne-archify', 'SKILL.md')), true);
 });
 
 test('missing target and unknown argument fail before writing', () => {

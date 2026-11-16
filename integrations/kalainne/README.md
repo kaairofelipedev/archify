@@ -32,10 +32,12 @@ Abra o HTML no navegador. A interface do viewer continua em inglês; os rótulos
 O instalador grava o skill `kalainne-archify` sem copiar o renderer. No desktop, rode a partir deste checkout:
 
 ```bash
-node integrations/kalainne/bin/install.mjs install --scope user --home "$HOME" --json
+node integrations/kalainne/bin/install.mjs install --scope user --json
 node integrations/kalainne/bin/install.mjs install --scope project --target /caminho/do/outro/projeto --json
 node integrations/kalainne/bin/install.mjs doctor --target . --json
 ```
+
+`install --scope user` usa `--home` quando passado; senão cai em `HOME` e, no Windows, em `USERPROFILE`. O `doctor` só consulta o skill de usuário se `--home` for passado, para não mascarar projeto sem install.
 
 Para automatizar vários projetos Kalainne de uma vez:
 
@@ -44,11 +46,11 @@ Para automatizar vários projetos Kalainne de uma vez:
 3. Rode:
 
 ```bash
-node integrations/kalainne/bin/bootstrap.mjs --targets integrations/kalainne/targets.json --with-user --home "$HOME" --json
+node integrations/kalainne/bin/bootstrap.mjs --targets integrations/kalainne/targets.json --with-user --json
 node integrations/kalainne/bin/install.mjs doctor --target . --json
 ```
 
-No Windows, se `HOME` não existir, `--with-user` usa `USERPROFILE`.
+No Windows, se `HOME` não existir, `--with-user` e `install --scope user` usam `USERPROFILE`.
 
 O bootstrap falha se algum path listado não existir, se `archifyCheckout` não for este repositório, ou se o `doctor` do Archify falhar. Ele é idempotente: pode rodar de novo após adicionar um projeto à lista.
 
@@ -66,15 +68,16 @@ node archify/bin/archify.mjs validate <tipo> <arquivo.json> --quality showcase -
 node archify/bin/archify.mjs deliver <tipo> <arquivo.json> <saida.html> --quality showcase --json
 ```
 
-`<tipo>` é `architecture`, `workflow`, `sequence`, `dataflow` ou `lifecycle`. A skill instalável continua sendo a do próprio Archify (`archify/SKILL.md`). O contrato operacional da Kalainne está em [`AGENTS.md`](AGENTS.md).
+`<tipo>` é `architecture`, `workflow`, `sequence`, `dataflow` ou `lifecycle`.
 
-Para instalar a skill no Cursor, o comando oficial do projeto é:
+Há duas superfícies de skill:
 
-```bash
-npx -y skills add tt-a1i/archify --skill archify --agent cursor --global --copy --yes
-```
+| Superfície | Onde | Como instalar |
+|---|---|---|
+| CLI Archify (upstream) | `archify/SKILL.md` | `npx -y skills add tt-a1i/archify --skill archify --agent cursor --global --copy --yes` |
+| Contrato Kalainne | `kalainne-archify` via este instalador / `.agents/skills/kalainne-archify` | `install.mjs` / `bootstrap.mjs` (acima) |
 
-Neste fork, o agente deve ler `archify/SKILL.md` e `integrations/kalainne/AGENTS.md` juntos. O comando acima instala o upstream; ele não copia esta pasta Kalainne.
+Neste checkout, o agente lê `archify/SKILL.md` e [`AGENTS.md`](AGENTS.md) juntos. Em outro projeto Kalainne, usa só o skill `kalainne-archify` e o `archify-root.json` gravado pelo instalador.
 
 ## Qual diagrama usar na Kalainne
 
@@ -117,7 +120,7 @@ Ficam de fora até o Kairo confirmar a stack: importar fluxo n8n, conectar Whats
 node --test integrations/kalainne/test/*.test.mjs
 ```
 
-A suíte exige os três JSON em `showcase`, confere que o HTML commitado é o `deliver` atual, e cobre install, bootstrap e doctor. O workflow `Kalainne maps` roda a mesma suíte quando esta pasta, o skill commitado ou a regra Cursor mudam.
+A suíte exige os três JSON em `showcase`, confere que o HTML commitado é o `deliver` atual, e cobre install, bootstrap e doctor. O workflow `Kalainne maps` roda a mesma suíte quando esta pasta, `archify/**`, o skill commitado ou a regra Cursor mudam.
 
 ## Evidência usada
 

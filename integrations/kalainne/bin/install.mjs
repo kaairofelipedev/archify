@@ -49,6 +49,10 @@ function existingDir(label, value) {
   return resolved;
 }
 
+function resolveHome(explicit) {
+  return explicit || process.env.HOME || process.env.USERPROFILE || '';
+}
+
 function workspaceBin(target) {
   return path.join(target, archifyBinRelative);
 }
@@ -154,11 +158,13 @@ function main() {
     return;
   }
   if (command === 'install' && options.scope === 'user') {
-    emit(options.json, installUser(existingDir('--home', options.home)));
+    emit(options.json, installUser(existingDir('--home', resolveHome(options.home))));
     return;
   }
   if (command === 'doctor') {
     const target = existingDir('--target', options.target ?? process.cwd());
+    // Doctor only uses an explicit --home so a missing project install is not
+    // masked by a desktop user skill discovered via HOME/USERPROFILE.
     const home = options.home ? existingDir('--home', options.home) : null;
     const found = locate(target, home);
     if (!found || found.error || !fs.existsSync(found.bin)) {
@@ -185,7 +191,7 @@ function main() {
     else process.stdout.write(`resolution=${found.resolution}\nbin=${found.bin}\n`);
     process.exit(payload.ok ? 0 : 1);
   }
-  fail('Uso: install --scope project --target <dir> | install --scope user --home <dir> | doctor --target <dir>', 2);
+  fail('Uso: install --scope project --target <dir> | install --scope user [--home <dir>] | doctor --target <dir> [--home <dir>]', 2);
 }
 
 main();

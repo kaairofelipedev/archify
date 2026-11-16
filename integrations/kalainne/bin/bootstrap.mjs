@@ -40,8 +40,19 @@ function parseArgs(argv) {
   return options;
 }
 
+function normalizePath(value) {
+  const resolved = path.resolve(value);
+  let real = resolved;
+  try {
+    real = fs.realpathSync.native(resolved);
+  } catch {
+    // Path may not exist yet; compare resolved forms.
+  }
+  return process.platform === 'win32' ? real.toLowerCase() : real;
+}
+
 function samePath(a, b) {
-  return path.resolve(a) === path.resolve(b);
+  return normalizePath(a) === normalizePath(b);
 }
 
 function runInstall(args) {
@@ -110,7 +121,13 @@ function main() {
   try {
     doctorPayload = JSON.parse(doctor.stdout || '{}');
   } catch {
-    doctorPayload = { ok: false };
+    doctorPayload = {
+      ok: false,
+      reason: 'bad-doctor-json',
+      status: doctor.status,
+      stdout: doctor.stdout,
+      stderr: doctor.stderr,
+    };
   }
   if (doctor.status !== 0 || !doctorPayload.ok) {
     const payload = {
@@ -118,7 +135,11 @@ function main() {
       error: 'doctor',
       user: null,
       projects: [],
-      doctor: doctorPayload,
+      doctor: {
+        ...doctorPayload,
+        status: doctor.status,
+        stderr: doctor.stderr,
+      },
     };
     if (options.json) process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
     else process.stderr.write('doctor falhou no checkout Archify.\n');

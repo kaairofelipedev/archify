@@ -3,7 +3,8 @@
   "archifyCheckout": "/caminho/absoluto/para/este/archify",
   "projects": [
     { "id": "site-kalainne", "path": "/caminho/site-kalainne" },
-    { "id": "expert-guide", "path": "/caminho/expert-guide" },
-    { "id": "salon-pro", "path": "/caminho/salon-pro" }
+    { "id": "kalainne-professional-sites", "path": "/caminho/kalainne-professional-sites" },
+    { "id": "kalainne-salon-pro", "path": "/caminho/kalainne-salon-pro" },
+    { "id": "cursor-central-kalainne", "path": "/caminho/cursor-central-kalainne" }
   ]
 }

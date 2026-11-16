@@ -127,3 +127,12 @@ test('bootstrap requires --targets and rejects a wrong archifyCheckout', () => {
   assert.equal(wrong.status, 1);
   assert.match(wrong.stdout + wrong.stderr, /archifyCheckout/);
 });
+
+test('bootstrap rejects corrupt targets JSON before installing', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'kalainne-bootstrap-bad-json-'));
+  const targets = path.join(root, 'targets.json');
+  fs.writeFileSync(targets, '{not json');
+  const result = run(['--targets', targets, '--json']);
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /targets inválido/);
+});
