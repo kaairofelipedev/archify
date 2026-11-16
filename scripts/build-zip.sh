@@ -5,24 +5,24 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 out="${1:-$repo_root/archify.zip}"
-# Git Bash callers may pass Windows-style absolute paths: drive paths (C:\...
-# or C:/...) and \\-prefixed forms such as UNC shares or the \\?\ extended-length
-# prefix. Node resolves those natively, so only genuinely relative paths get the
-# cwd prefix; prefixing a Windows path would send MSYS a malformed mixed path.
-windows_absolute='^([A-Za-z]:[/\\]|\\\\)'
-if [[ "$out" != /* && ! "$out" =~ $windows_absolute ]]; then
-  out="$(pwd)/$out"
-fi
+
+# Reject unsafe raw output spellings before the canonical-toolchain gate so
+# every maintained Node lane exercises the same shared native path grammar.
+# This validation-only mode is read-only and does not create parent paths.
+node "$repo_root/scripts/write-deterministic-zip.mjs" --validate-output "$out"
 
 # Runtime consumers support every Node version declared by archify/package.json,
 # but canonical ZIP bytes depend on the Node/zlib toolchain. CI and releases use
-# Node 22, so fail clearly instead of publishing different bytes from another
-# Node major.
+# official Node 22 with its bundled zlib. Distributions linked against a system
+# zlib can produce different bytes even at the same Node version.
 canonical_node_major=22
+canonical_zlib_version=1.3.1-e00f703
 node_version="$(node -p 'process.versions.node')"
 node_major="${node_version%%.*}"
-if [[ "$node_major" != "$canonical_node_major" ]]; then
-  echo "canonical archify.zip builds require Node $canonical_node_major (current: $node_version)" >&2
+zlib_version="$(node -p 'process.versions.zlib')"
+if [[ "$node_major" != "$canonical_node_major" || "$zlib_version" != "$canonical_zlib_version" ]]; then
+  echo "canonical archify.zip builds require Node $canonical_node_major with bundled zlib $canonical_zlib_version (current: Node $node_version, zlib $zlib_version)" >&2
+  echo "Use an official Node.js 22 distribution with the required bundled zlib on PATH; diagram runtime support is unchanged." >&2
   exit 1
 fi
 

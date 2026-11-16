@@ -1,7 +1,10 @@
 .DS_Store
 .harnessed/
 node_modules/
+.wrangler/
 .claude/
 .lore/
 /.impeccable/
 integrations/kalainne/targets.json
+__pycache__/
+*.py[cod]
