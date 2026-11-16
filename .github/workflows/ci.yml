@@ -540,6 +540,10 @@ jobs:
       - name: Install test dependencies
         if: needs.scope.outputs.windows == 'true'
         run: npm ci --ignore-scripts && npm --prefix archify ci --ignore-scripts
+      - name: Present the upstream origin to repository evidence
+        if: needs.scope.outputs.windows == 'true' && github.repository_owner != 'tt-a1i'
+        shell: bash
+        run: git remote set-url origin https://github.com/tt-a1i/archify
       - name: Provision controlled Windows path fixtures
         if: needs.scope.outputs.windows == 'true'
         shell: pwsh
