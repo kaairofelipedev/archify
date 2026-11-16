@@ -738,6 +738,11 @@ test('CI tests the declared Node floor plus every maintained current lane', () =
   }
 
   const packageSmokeJob = workflowJob(workflow, 'package-smoke');
-  assert.match(packageSmokeJob, /os:\s*\[ubuntu-latest, macos-latest, windows-latest\]/);
+  // Upstream must still declare ubuntu/macos/windows; forks may omit macos via
+  // fromJSON so cancelled empty macos runners do not leave the PR UNSTABLE.
+  assert.match(
+    packageSmokeJob,
+    /os:\s*(?:\[ubuntu-latest, macos-latest, windows-latest\]|\$\{\{\s*fromJSON\(github\.repository_owner == 'tt-a1i' && '\["ubuntu-latest","macos-latest","windows-latest"\]' \|\| '\["ubuntu-latest","windows-latest"\]'\)\s*\}\})/,
+  );
   assert.match(packageSmokeJob, /node-version:\s*22/);
 });
