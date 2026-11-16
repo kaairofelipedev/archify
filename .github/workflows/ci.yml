@@ -113,7 +113,16 @@ jobs:
         run: |
           set -euo pipefail
           manifest_version="$(node --input-type=module -e 'import fs from "node:fs"; import { validateStableUpdateManifest } from "./archify/scripts/update-contract.mjs"; process.stdout.write(validateStableUpdateManifest(JSON.parse(fs.readFileSync("./docs/skill-updates/archify/stable.json", "utf8"))).version);')"
-          latest_stable_tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq 'select(.draft == false and .prerelease == false) | .tag_name')"
+          # Forks (and unpublished mirrors) may keep stable.json without publishing
+          # Releases. Skip the Release-binding gate when this repo has none.
+          if ! latest_stable_tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq 'select(.draft == false and .prerelease == false) | .tag_name' 2>/tmp/archify-latest-release-err)"; then
+            if grep -Eqi 'HTTP 404|Not Found' /tmp/archify-latest-release-err; then
+              echo "::notice::No GitHub Releases in ${GITHUB_REPOSITORY}; skipping published-update-manifest Release binding"
+              exit 0
+            fi
+            cat /tmp/archify-latest-release-err >&2
+            exit 1
+          fi
           if [[ "$latest_stable_tag" != "v${manifest_version}" ]]; then
             echo "::error::stable.json v${manifest_version} must match the latest published stable Release ${latest_stable_tag:-'(missing)'}"
             exit 1
