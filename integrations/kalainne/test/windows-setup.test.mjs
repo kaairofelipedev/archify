@@ -16,6 +16,8 @@ test('Windows setup script uses the Kalainne installer and the fork', () => {
   assert.match(script, /integrations\/kalainne\/bin\/bootstrap\.mjs/);
   assert.match(script, /'--with-user'/);
   assert.match(script, /'--home', \$env:USERPROFILE/);
+  assert.match(script, /http\.version=HTTP\/1\.1/);
+  assert.match(script, /--depth',\s*'1'/);
   assert.match(script, /OpenJS\.NodeJS\.LTS/);
   assert.match(script, /npx/);
   assert.match(script, /tt-a1i\/archify/);

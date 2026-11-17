@@ -104,16 +104,61 @@ if (-not (Test-Path -LiteralPath $checkoutParent)) {
   New-Item -ItemType Directory -Force -Path $checkoutParent | Out-Null
 }
 
-if (Test-Path -LiteralPath (Join-Path $Checkout '.git')) {
+function Invoke-Git {
+  param(
+    [Parameter(Mandatory = $true)][string[]]$ArgumentList,
+    [Parameter(Mandatory = $true)][string]$Failure
+  )
+  # Windows schannel + HTTP/2 fecha o clone grande com "missing close_notify".
+  $gitArgs = @('-c', 'http.version=HTTP/1.1', '-c', 'http.postBuffer=524288000') + $ArgumentList
+  & git @gitArgs
+  if ($LASTEXITCODE -ne 0) {
+    throw "$Failure (codigo $LASTEXITCODE)."
+  }
+}
+
+function Remove-PartialCheckout {
+  if (Test-Path -LiteralPath $Checkout) {
+    Write-Host "Removendo download incompleto em $Checkout"
+    Remove-Item -LiteralPath $Checkout -Recurse -Force
+  }
+}
+
+$installer = Join-Path $Checkout 'integrations\kalainne\bin\install.mjs'
+$hasGit = Test-Path -LiteralPath (Join-Path $Checkout '.git')
+if ($hasGit -and -not (Test-Path -LiteralPath $installer)) {
+  Remove-PartialCheckout
+  $hasGit = $false
+}
+if ((-not $hasGit) -and (Test-Path -LiteralPath $Checkout)) {
+  Remove-PartialCheckout
+}
+
+if ($hasGit) {
   Write-Host "Atualizando $Checkout"
-  Invoke-Checked 'git' @('-C', $Checkout, 'fetch', 'origin', $Branch) 'git fetch falhou'
-  Invoke-Checked 'git' @('-C', $Checkout, 'checkout', $Branch) 'git checkout falhou'
-  Invoke-Checked 'git' @('-C', $Checkout, 'pull', '--ff-only', 'origin', $Branch) 'git pull falhou'
-} elseif (Test-Path -LiteralPath $Checkout) {
-  throw "A pasta existe e nao e um repositorio Git: $Checkout"
+  Invoke-Git @('-C', $Checkout, 'fetch', '--depth', '1', 'origin', $Branch) 'git fetch falhou'
+  Invoke-Git @('-C', $Checkout, 'checkout', $Branch) 'git checkout falhou'
+  Invoke-Git @('-C', $Checkout, 'pull', '--ff-only', '--depth', '1', 'origin', $Branch) 'git pull falhou'
 } else {
   Write-Host "Baixando $RepoUrl em $Checkout"
-  Invoke-Checked 'git' @('clone', '--branch', $Branch, '--single-branch', $RepoUrl, $Checkout) 'git clone falhou'
+  $cloned = $false
+  foreach ($attempt in 1, 2, 3) {
+    try {
+      Invoke-Git @(
+        'clone', '--depth', '1', '--branch', $Branch, '--single-branch', $RepoUrl, $Checkout
+      ) 'git clone falhou'
+      $cloned = $true
+      break
+    } catch {
+      if ($attempt -eq 3) { throw }
+      Write-Host "Clone interrompido (tentativa $attempt de 3). Tentando de novo."
+      Remove-PartialCheckout
+      Start-Sleep -Seconds (5 * $attempt)
+    }
+  }
+  if (-not $cloned) {
+    throw 'git clone falhou.'
+  }
 }
 
 $installer = Join-Path $Checkout 'integrations\kalainne\bin\install.mjs'

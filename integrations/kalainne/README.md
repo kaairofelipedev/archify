@@ -52,7 +52,7 @@ node integrations/kalainne/bin/install.mjs doctor --target . --json
 
 No Windows, se `HOME` não existir, `--with-user` e `install --scope user` usam `USERPROFILE`.
 
-O script [`bin/install-windows.ps1`](bin/install-windows.ps1) faz o caminho inteiro no desktop: instala Git e Node 22 LTS se faltarem, clona ou atualiza este fork em `%USERPROFILE%\src\archify`, roda `npm ci`, grava o skill no usuário, instala o skill público `archify` e abre os três HTML. Projetos que já existem no disco entram com `-Project`; pastas ausentes são ignoradas. `targets.json` continua fora do Git.
+O script [`bin/install-windows.ps1`](bin/install-windows.ps1) faz o caminho inteiro no desktop: instala Git e Node 22 LTS se faltarem, clona ou atualiza este fork em `%USERPROFILE%\src\archify`, roda `npm ci`, grava o skill no usuário, instala o skill público `archify` e abre os três HTML. O clone usa HTTP/1.1 e só o commit atual do `main`, e tenta de novo se o Windows cortar a conexão. Projetos que já existem no disco entram com `-Project`; pastas ausentes são ignoradas. `targets.json` continua fora do Git.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\integrations\kalainne\bin\install-windows.ps1
