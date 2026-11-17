@@ -52,6 +52,13 @@ node integrations/kalainne/bin/install.mjs doctor --target . --json
 
 No Windows, se `HOME` não existir, `--with-user` e `install --scope user` usam `USERPROFILE`.
 
+O script [`bin/install-windows.ps1`](bin/install-windows.ps1) faz o caminho inteiro no desktop: instala Git e Node 22 LTS se faltarem, clona ou atualiza este fork em `%USERPROFILE%\src\archify`, roda `npm ci`, grava o skill no usuário, instala o skill público `archify` e abre os três HTML. Projetos que já existem no disco entram com `-Project`; pastas ausentes são ignoradas. `targets.json` continua fora do Git.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\integrations\kalainne\bin\install-windows.ps1
+.\integrations\kalainne\bin\install-windows.ps1 -Project C:\src\site-kalainne -NoBrowser
+```
+
 O bootstrap falha se algum path listado não existir, se `archifyCheckout` não for este repositório, ou se o `doctor` do Archify falhar. Ele é idempotente: pode rodar de novo após adicionar um projeto à lista.
 
 O escopo `user` escreve `~/.agents/skills/kalainne-archify` e `~/.cursor/skills/kalainne-archify`. O escopo `project` escreve `.agents/skills/kalainne-archify` e `.cursor/rules/kalainne-archify.mdc`. Claude Code, Codex e OpenCode leem o skill de projeto em `.agents/skills/`.
