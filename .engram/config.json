@@ -1,0 +1,6 @@
+{
+  "project": "kalainne-ecosystem",
+  "project_name": "kalainne-ecosystem",
+  "workspace": "D:\\GitHub\\archify-1",
+  "notes": "Kalainne Archify fork checkout (kaairofelipedev/archify). Pins Engram project resolution for Cursor/Claude/Codex when cwd is this repo."
+}
