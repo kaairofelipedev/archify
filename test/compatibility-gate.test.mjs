@@ -46,7 +46,15 @@ test('all maintained Node check names remain and publication uses exhaustive ver
   assert.equal(canonical.name, 'test (22)');
   assert.deepEqual(canonical.needs, ['scope', 'full-regression']);
   const packages = ci.jobs['package-smoke'];
-  assert.deepEqual(packages.strategy.matrix.os, ['ubuntu-latest', 'macos-latest', 'windows-latest']);
+  // Upstream keeps the three-OS literal. This fork uses fromJSON so non-tt-a1i
+  // owners omit macos (empty runners cancel and leave the PR UNSTABLE).
+  const packageOs = packages.strategy.matrix.os;
+  const upstreamOs = ['ubuntu-latest', 'macos-latest', 'windows-latest'];
+  const forkOsExpression = "${{ fromJSON(github.repository_owner == 'tt-a1i' && '[\"ubuntu-latest\",\"macos-latest\",\"windows-latest\"]' || '[\"ubuntu-latest\",\"windows-latest\"]') }}";
+  assert.ok(
+    JSON.stringify(packageOs) === JSON.stringify(upstreamOs) || packageOs === forkOsExpression,
+    `package-smoke OS matrix must be the upstream trio or the fork owner gate, got ${JSON.stringify(packageOs)}`,
+  );
   const nativeSdk = packages.steps.find(step => step.name === 'Verify JS/TS project selection, resolution and calls');
   assert.equal(nativeSdk.if, "needs.scope.outputs.scope == 'full' && runner.os != 'Linux'");
   assert.ok(nativeSdk.run.includes('test/ts-official-projects.test.mjs'));
