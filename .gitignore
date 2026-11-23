@@ -7,5 +7,10 @@ node_modules/
 /.impeccable/
 integrations/kalainne/targets.json
 integrations/kalainne/artifacts/*.delivery.json
+
+# Local analysis outputs and validator test scratch directories
+/archify/out/
+/out/
+/archify/.validator-check-*/
 __pycache__/
 *.py[cod]

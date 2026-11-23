@@ -108,6 +108,25 @@ Antes de desenhar deploy, região ou dono de infraestrutura, os fatos precisam e
 
 Agentes que o plano de 06/10/2026 nomeia e que estes mapas deixam nas fichas, para não estourar o caminho principal: Kairós Grokado, dr eggbot, Ops, Visual Pipeline, Growth, Comercial, Care e Kairo Executive. Kairós e dr eggbot já existiam como teammates. Os demais estavam especificados para criação, não confirmados um a um como bots ativos.
 
+## Manter o fork alinhado ao upstream
+
+Os commits Kalainne deste fork vivem **neste** repositório (`integrations/kalainne`, gates de CI do fork, `install-windows.ps1`). Eles **não** são commits do `site-kalainne` nem dos outros produtos — esses produtos só recebem o skill via `bootstrap.mjs`.
+
+Antes de sobrescrever `main` local ou remoto, faça backup em `D:\Backups` (bundle git + `targets.json` + `archify-root.json` do usuário).
+
+```powershell
+git remote add upstream https://github.com/tt-a1i/archify.git   # uma vez
+git fetch upstream main
+git checkout -B sync/upstream-YYYYMMDD main
+git merge --no-ff upstream/main
+# Resolver conflitos preservando: ignore de targets.json, skip Pages/macos/Release no fork,
+# e o passo que remapeia origin para evidência no Windows.
+node --test integrations/kalainne/test/*.test.mjs
+node integrations/kalainne/bin/install.mjs doctor --json
+```
+
+Só depois de verde: abrir PR do branch `sync/...` para `main` do fork (ou merge local + push). Não use force-push em `main`.
+
 ## Continuidade do desenvolvimento
 
 Cada fatia abaixo cabe neste repositório e usa o CLI que já existe.
