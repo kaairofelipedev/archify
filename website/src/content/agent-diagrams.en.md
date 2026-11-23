@@ -1,8 +1,8 @@
 # Create diagrams with your coding agent
 
-Archify is an open-source diagram skill for coding agents including Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot. Your agent interprets a description or repository evidence and writes typed JSON. Archify renders and checks that source to produce an interactive HTML diagram.
+Archify is an open-source visual explanation skill for coding agents including Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot. From a plain-language idea, an everyday plan, a complex topic, a Mermaid draft, or repository evidence, your agent writes typed JSON across **10 native diagram types** or an `.archify.md` **one-page explainer**; Archify renders a polished, standalone interactive HTML file and runs structure/layout validation (with default real-browser checks for native diagrams; opt-in via `--browser-check` for explainers).
 
-Use it when you want to explain a system's parts, a process, a sequence of calls, or another supported relationship structure. Start from words if you do not have a repository. Start from code when the diagram needs source evidence.
+Use it to make anything complex easy to see and explore — travel schedules, apartment-renting checklists, monthly cashflows, science/protocol explainers, workflows, or production system architectures. Start fast in plain words with zero diagram syntax to learn; add repository evidence when you want code-backed diagrams, or ask your agent afterward to extend the standalone HTML.
 
 The generated diagram is a model of the facts its author supplied. Passing its checks does not prove that a running system behaves that way.
 
@@ -154,6 +154,15 @@ For an existing source-backed example, see the [MCO runtime architecture](https:
 
 [Follow the MCO source case: who decodes output and who writes files →](cases/mco-runtime.html)
 
+### Check the dependencies with Architecture Diagnosis
+
+A diagram shows the architecture you described; Architecture Diagnosis shows how the code actually depends on itself. It is built into the Skill. After a repository-backed architecture diagram passes its checks, the agent's summary ends with what Diagnosis can do, and it runs only if you say yes. You can also ask directly:
+
+> Use archify Code Analysis on this repository: show module coupling, dependency cycles and hotspots.
+
+The result is one offline HTML file: a dependency star map, a rotatable 3D model and ranked findings (cycles, coupling, complexity hotspots, layer-rule breaks), each linked to its source with a fix task you can hand back to the agent. Paired with your architecture diagram, every component shows its issue count, and imports the diagram does not show are flagged. JS/TS, Python, Java, Go, Rust, C and C++ are supported; Go, Rust and C/C++ need their own toolchains. Findings come from static analysis of one pinned revision, not from runtime traces. See the [Code Analysis guide](https://github.com/tt-a1i/archify/blob/main/archify/modules/code-analysis/docs/USAGE.md).
+
+
 <span id="explainer" class="section-anchor" aria-hidden="true"></span>
 
 ## One diagram, or a one-page explainer?
@@ -175,7 +184,7 @@ Make focused revisions through your agent: explain a missing return, rename a co
 
 Open the HTML and review both its meaning and readability. Automated checks and a human visual inspection answer different questions. Do not treat one as a substitute for the other.
 
-Share the HTML when readers need its interactions. Use an image export when a document or slide needs a static view. Archify documents PNG, JPEG, WebP, SVG, and WebM exports; availability depends on the format, browser, and local tooling. Inspect the actual artifact's export menu before committing to a delivery format. An exported image does not preserve the HTML's interactive controls.
+Share the HTML when readers need its interactions. Use an image export when a document or slide needs a static view. Archify documents PNG, JPEG, WebP, SVG, and WebM exports, and a diagram with an attached story adds a 1080p Story video (WebM or MP4); availability depends on the format, browser, and local tooling. Inspect the actual artifact's export menu before committing to a delivery format. An exported image does not preserve the HTML's interactive controls.
 
 Before sharing a repository-derived artifact, check its labels, cards, embedded source, and links for information that should not leave your team. A standalone file is portable, not automatically public-safe. The coding agent's own data handling remains separate from Archify's artifact format.
 

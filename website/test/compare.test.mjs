@@ -27,7 +27,7 @@ for (const lang of ['en', 'zh']) {
     assert.equal(nodes(article).filter(node => node.tagName === 'h1').length, 1);
 
     const visible = text(article);
-    for (const tool of ['Mermaid', 'Excalidraw', 'PlantUML', 'D2']) assert.ok(visible.includes(tool), `${lang}: ${tool}`);
+    for (const tool of ['Mermaid', 'Excalidraw', 'PlantUML', 'D2', 'LikeC4', 'Eraser.io']) assert.ok(visible.includes(tool), `${lang}: ${tool}`);
     assert.match(visible, lang === 'en' ? /short answer/i : /先说结论/);
     assert.match(visible, lang === 'en' ? /not a lossless converter|not a Mermaid parser/i : /不是无损转换/);
     assert.doesNotMatch(visible, /aggregateRating|reviewCount|ratingValue/);
@@ -58,7 +58,7 @@ for (const lang of ['en', 'zh']) {
 
     const links = nodes(article).filter(node => node.tagName === 'a')
       .map(node => new URL(attr(node, 'href'), base));
-    const required = [`agent-diagrams${extension}#mermaid-input`, `start${extension}?type=workflow&input=description`, `cases/mco-runtime${extension}`, 'cases/mco-runtime.architecture.html', 'cases/explainer/p99-tail-latency.html', 'cases/explainer/tls-first-visit.html'];
+    const required = [`agent-diagrams${extension}#mermaid-input`, `start${extension}?type=workflow&input=description`, `cases/mco-runtime${extension}`, 'cases/mco-runtime.architecture.html', 'cases/explainer/p99-tail-latency.html', 'cases/explainer/tls-first-visit.html', 'cases/explainer/first-rental.html', 'cases/life/leave-plan.workflow.html', 'cases/community/shanghai-citywalk.html'];
     for (const target of required) {
       const url = new URL(target, base);
       const suffix = url.pathname.slice(url.pathname.lastIndexOf('/') + 1) + url.search + url.hash;

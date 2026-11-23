@@ -52,7 +52,7 @@ node integrations/kalainne/bin/install.mjs doctor --target . --json
 
 No Windows, se `HOME` não existir, `--with-user` e `install --scope user` usam `USERPROFILE`.
 
-O script [`bin/install-windows.ps1`](bin/install-windows.ps1) faz o caminho inteiro no desktop: instala Git e Node 22 LTS se faltarem, clona ou atualiza este fork em `%USERPROFILE%\src\archify`, roda `npm ci`, grava o skill no usuário, instala o skill público `archify` e abre os três HTML. O clone usa HTTP/1.1 e só o commit atual do `main`, e tenta de novo se o Windows cortar a conexão. Projetos que já existem no disco entram com `-Project`; pastas ausentes são ignoradas. `targets.json` continua fora do Git.
+O script [`bin/install-windows.ps1`](bin/install-windows.ps1) faz o caminho inteiro no desktop: instala Git e Node 22 LTS se faltarem, clona ou atualiza este fork em `%USERPROFILE%\src\archify`, ativa `pnpm` via Corepack e roda `pnpm install --frozen-lockfile`, grava o skill no usuário, instala o skill público `archify` e abre os três HTML. O clone usa HTTP/1.1 e só o commit atual do `main`, e tenta de novo se o Windows cortar a conexão. Projetos que já existem no disco entram com `-Project`; pastas ausentes são ignoradas. `targets.json` continua fora do Git.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\integrations\kalainne\bin\install-windows.ps1
@@ -107,6 +107,25 @@ Antes de desenhar deploy, região ou dono de infraestrutura, os fatos precisam e
 - O HTML verificado volta ao Notion como link. O Notion segue sendo a fonte.
 
 Agentes que o plano de 06/10/2026 nomeia e que estes mapas deixam nas fichas, para não estourar o caminho principal: Kairós Grokado, dr eggbot, Ops, Visual Pipeline, Growth, Comercial, Care e Kairo Executive. Kairós e dr eggbot já existiam como teammates. Os demais estavam especificados para criação, não confirmados um a um como bots ativos.
+
+## Manter o fork alinhado ao upstream
+
+Os commits Kalainne deste fork vivem **neste** repositório (`integrations/kalainne`, gates de CI do fork, `install-windows.ps1`). Eles **não** são commits do `site-kalainne` nem dos outros produtos — esses produtos só recebem o skill via `bootstrap.mjs`.
+
+Antes de sobrescrever `main` local ou remoto, faça backup em `D:\Backups` (bundle git + `targets.json` + `archify-root.json` do usuário).
+
+```powershell
+git remote add upstream https://github.com/tt-a1i/archify.git   # uma vez
+git fetch upstream main
+git checkout -B sync/upstream-YYYYMMDD main
+git merge --no-ff upstream/main
+# Resolver conflitos preservando: ignore de targets.json, skip Pages/macos/Release no fork,
+# e o passo que remapeia origin para evidência no Windows.
+node --test integrations/kalainne/test/*.test.mjs
+node integrations/kalainne/bin/install.mjs doctor --json
+```
+
+Só depois de verde: abrir PR do branch `sync/...` para `main` do fork (ou merge local + push). Não use force-push em `main`.
 
 ## Continuidade do desenvolvimento
 

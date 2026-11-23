@@ -1,8 +1,8 @@
 # 用 Coding Agent 画出可检查的图
 
-Archify 是面向 Coding Agent 的开源画图技能，可配合 Claude Code、Codex、Cursor、OpenCode 和 GitHub Copilot 使用。Agent 理解你的描述或代码仓库证据，编写结构化 JSON；Archify 将其渲染并校验为可交互的 HTML 图。
+Archify 是面向 Coding Agent 的开源交互式可视化技能，支持 Claude Code、Codex、Cursor、OpenCode 和 GitHub Copilot。无论是自然语言想法、日常生活规划、复杂概念拆解、Mermaid 草稿还是代码仓库，Agent 都能自动选择**十种原生图型**编写结构化 JSON，或编写 `.archify.md` 生成**四套风格的一页式解答（Explainer）**，经确定性防穿模布局与校验门禁（原生图表默认执行真实浏览器检查；一页式解答可通过 `--browser-check` 按需开启浏览器检查）后交付一份精致的独立交互 HTML。
 
-当你需要讲清系统组成、流程步骤、调用顺序或其他受支持的关系结构时，可以使用它。没有仓库也能从文字开始；需要解释真实代码时，再让 Agent 查阅相关源码。
+它远不止用于画代码架构：从旅行攻略、租房签约避坑、年假/月薪规划，到科普机理、业务流转与真实仓库源码地图，都无需背任何画图语法、不用仓库即可直接开始，还能对生成的独立 HTML 对话扩展更多互动功能；需要追溯代码时，再让 Agent 对接仓库源码。
 
 图表达的是作者提供的事实模型。通过图表校验，不等于证明真实系统确实如此运行。
 
@@ -154,6 +154,15 @@ Codex CLI 的全局 Skill 目录是 `~/.agents/skills/`，项目目录是 `.agen
 
 [对照 MCO 源码：谁解码输出，谁写入文件 →](cases/mco-runtime.html)
 
+### 用架构诊断核对真实依赖
+
+架构图画的是你描述的结构，架构诊断看的是代码之间真实的依赖关系。它内置在 Skill 里：基于仓库的架构图通过检查后，Agent 会在总结末尾说明架构诊断能做什么，只有你同意才会运行。也可以直接要求：
+
+> 用 archify 的 Code Analysis 分析这个仓库：看模块耦合、循环依赖和复杂度热点。
+
+结果是一个可离线打开的 HTML 文件，包含依赖星图、可旋转的 3D 模型和按严重程度排序的发现（循环依赖、耦合、复杂度热点、违反分层规则），每条都链接到源码，并附上可以交回给 Agent 的修复任务。和架构图一起看时，每个组件会标出问题数，图里没画出的依赖也会被指出。支持 JS/TS、Python、Java、Go、Rust、C 和 C++；Go、Rust 与 C/C++ 需要各自的工具链。这些发现来自对某一固定提交的静态分析，不是运行时追踪。详见 [Code Analysis 使用指南](https://github.com/tt-a1i/archify/blob/main/archify/modules/code-analysis/docs/USAGE.md)。
+
+
 <span id="explainer" class="section-anchor" aria-hidden="true"></span>
 
 ## 画一张图，还是生成一页式解答？
@@ -175,7 +184,7 @@ Codex CLI 的全局 Skill 目录是 `~/.agents/skills/`，项目目录是 `.agen
 
 打开 HTML，分别检查内容是否准确、文字和连线是否可读。自动校验与人工视觉检查解决的是不同问题，不能彼此替代。
 
-读者需要交互时，分享 HTML；文档或幻灯片需要静态画面时，再导出图片。文档列出了 PNG、JPEG、WebP、SVG 和 WebM 等导出格式，但具体可用性取决于格式、浏览器及本地工具。先查看实际成品的导出菜单，再承诺交付格式。导出图片不会保留 HTML 中的交互控件。
+读者需要交互时，分享 HTML；文档或幻灯片需要静态画面时，再导出图片。文档列出了 PNG、JPEG、WebP、SVG 和 WebM 等导出格式，附有导览故事的图还能导出 1080p 的 Story 视频（WebM 或 MP4），但具体可用性取决于格式、浏览器及本地工具。先查看实际成品的导出菜单，再承诺交付格式。导出图片不会保留 HTML 中的交互控件。
 
 分享仓库生成的图之前，检查标签、卡片、内嵌源文件和链接是否包含不宜外传的信息。单文件便于携带，并不表示适合公开。你使用的 Coding Agent 如何处理数据，也不能仅凭 Archify 的输出格式推断。
 
