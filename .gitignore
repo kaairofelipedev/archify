@@ -14,3 +14,8 @@ integrations/kalainne/artifacts/*.delivery.json
 /archify/.validator-check-*/
 __pycache__/
 *.py[cod]
+
+# Engram local store; keep config.json tracked via force-add if needed
+.engram/chunks/
+.engram/manifest.json
+
