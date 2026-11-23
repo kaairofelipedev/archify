@@ -31,5 +31,10 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 22
+          # package.json pins pnpm; without this, setup-node looks for a pnpm binary first.
+          package-manager-cache: false
+      - uses: ./.github/actions/setup-pnpm
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Validate Kalainne maps
         run: node --test integrations/kalainne/test/*.test.mjs
