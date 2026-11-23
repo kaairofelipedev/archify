@@ -168,9 +168,13 @@ if (-not (Test-Path -LiteralPath $installer)) {
 
 Push-Location $Checkout
 try {
-  Write-Host 'Instalando dependencias do repositorio'
-  Invoke-Checked 'npm' @('ci', '--no-audit', '--no-fund') 'npm ci na raiz falhou'
-  Invoke-Checked 'npm' @('--prefix', 'archify', 'ci', '--no-audit', '--no-fund') 'npm ci em archify falhou'
+  Write-Host 'Instalando dependencias do repositorio (pnpm)'
+  if (-not (Test-CommandAvailable 'pnpm')) {
+    Invoke-Checked 'corepack' @('enable') 'corepack enable falhou'
+    Invoke-Checked 'corepack' @('prepare', 'pnpm@12.21.0', '--activate') 'corepack prepare pnpm falhou'
+    Update-SessionPath
+  }
+  Invoke-Checked 'pnpm' @('install', '--frozen-lockfile', '--ignore-scripts') 'pnpm install na raiz falhou'
 
   Write-Host 'Gravando o skill kalainne-archify no usuario'
   Invoke-Checked 'node' @(
